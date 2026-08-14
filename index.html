@@ -404,7 +404,7 @@
     document.getElementById('profileEmail').textContent = payload.email;
 
     const now = new Date();
-    document.getElementById('verifiedAt').textContent = now.toLocaleTimeString('es-AR');
+    document.getElementById('verifiedAt').textContent = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR');
 
     if (COMERCIO !== 'No especificado') {
       document.getElementById('comercioName').textContent = COMERCIO.replace(/-/g, ' ');
