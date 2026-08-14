@@ -294,8 +294,33 @@
     <!-- ESTADO 1: LOGIN -->
     <div id="view-login">
       <p class="lead">Verificá tu vínculo con el colegio</p>
-      <p class="sub">Ingresá con la cuenta de Google del colegio<br><strong>@colegiowestminster.com.ar</strong> para generar tu credencial.</p>
-
+     <p class="sub">Ingresá con la cuenta de Google del colegio<br><strong>@colegiowestminster.com.ar</strong> para generar tu credencial.</p>
+      <div id="comercioSelectWrap" style="display:none; width:100%; margin-bottom:16px;">
+        <label for="comercioSelect" style="display:block; margin-bottom:6px; font-weight:600;">¿En qué comercio estás?</label>
+        <select id="comercioSelect" style="width:100%; padding:10px; border-radius:8px; font-size:1rem;">
+          <option value="No especificado">Seleccioná un comercio</option>
+          <option value="Belleza-AM-Estetica">Belleza AM Estética</option>
+          <option value="Confiteria-Nuevo-Modelo">Confitería Nuevo Modelo</option>
+          <option value="Cook-Market">Cook Market</option>
+          <option value="Cotillon-Maipu">Cotillón Maipú</option>
+          <option value="Detailing">Detailing</option>
+          <option value="Duomo-Padel">Duomo Pádel</option>
+          <option value="Gimnasio-Good-Life">Gimnasio Good Life</option>
+          <option value="ICP-Audiovisuales">ICP Audiovisuales</option>
+          <option value="Indumentaria-Fisica-y-Quimica">Indumentaria Física & Química</option>
+          <option value="Jugueteria-My-Toys">Juguetería My Toys</option>
+          <option value="Lavadero-Alsina">Lavadero Alsina</option>
+          <option value="Libreria-Eiffel">Librería Eiffel</option>
+          <option value="Normanda">Normanda</option>
+          <option value="Pastas-La-Familia">Pastas La Familia</option>
+          <option value="Picadas-Fiambreria-Don-Cacho">Picadas/Fiambrería Don Cacho</option>
+          <option value="Pizzeria-La-Esquina">Pizzería La Esquina</option>
+          <option value="Resto-Puesto-54">Restó Puesto 54</option>
+          <option value="Salon-Multieventos-Espacio-2911">Salón Multieventos Espacio 2911</option>
+          <option value="Vivero-Hana">Vivero Hana</option>
+          <option value="Your-Iphone">Your Iphone</option>
+        </select>
+      </div>
       <div class="gbtn-wrap">
         <div id="g_id_signin"></div>
       </div>
@@ -356,7 +381,13 @@
 
   // Lee el nombre del comercio desde el link, ej: ?comercio=Kiosco-La-Esquina
   const params = new URLSearchParams(window.location.search);
-  const COMERCIO = params.get('comercio') || 'No especificado';
+ let COMERCIO = params.get('comercio') || 'No especificado';
+if (COMERCIO === 'No especificado') {
+  document.getElementById('comercioSelectWrap').style.display = 'block';
+  document.getElementById('comercioSelect').addEventListener('change', function () {
+    COMERCIO = this.value;
+  });
+}
 
   function registrarVerificacion(nombre, email) {
     if (REGISTRO_URL === "PEGAR_URL_APPS_SCRIPT_AQUI") return; // no configurado todavía
