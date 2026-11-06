@@ -489,7 +489,8 @@ if (COMERCIO === 'No especificado') {
     document.getElementById('view-verified').classList.add('show');
     document.getElementById('expiredNote').classList.remove('show');
 
-    if (COMERCIO === 'McDonalds-Banfield') {
+    // Solo en el QR de McDonald's (sin ?beneficio=): botón para ir a la lista de beneficios
+    if (COMERCIO === 'McDonalds-Banfield' && !BENEFICIO_ID) {
       document.getElementById('verBeneficiosBtn').style.display = 'block';
     }
 
