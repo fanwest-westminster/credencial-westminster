@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FanWest · Beneficios</title>
+<style>
+:root{--v:#7B2D8E;--c:#FF7B54;--m:#E91E8C;--bg:#FDF2F8;--tx:#2b1733}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:var(--v);color:#fff;padding:18px 16px;text-align:center}
+header h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;font-size:14px;opacity:.9}
+main{max-width:900px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(123,45,142,.12);display:flex;flex-direction:column;gap:8px}
+.com{cursor:pointer;align-items:center;text-align:center}
+.logo{width:72px;height:72px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:30px;font-weight:bold;color:var(--v)}
+.logo img{width:100%;height:100%;object-fit:contain}
+.cat{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--m);font-weight:bold}
+.tit{font-size:15px;font-weight:bold}
+.cond{font-size:12px;color:#666;flex:1}
+.vig{font-size:11px;color:#888}
+button,.btn{background:var(--v);color:#fff;border:0;border-radius:20px;padding:10px 12px;font-size:14px;font-weight:bold;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.btn:hover,button:hover{background:var(--m)}
+.back{background:none;color:var(--v);padding:6px 0;margin-bottom:10px;text-align:left}
+.back:hover{background:none;color:var(--m)}
+.msg{text-align:center;padding:30px 10px;color:#666}
+h2{margin:0 0 12px;color:var(--v)}
+</style>
+</head>
+<body>
+<header><h1>FanWest · Beneficios</h1><p>Para la comunidad del Colegio Westminster</p></header>
+<main id="app"><p class="msg">Cargando beneficios…</p></main>
+
+<script>
+// ====== CONFIGURACIÓN (completar estas 2 líneas) ======
+// 1) Link CSV publicado de la pestaña BENEFICIOS (Archivo > Compartir > Publicar en la web > CSV)
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj997Q_ICW2oLVr-yTK53QihfZCRicC4qUSJPHA9cFZ6mU7HYUKv7K9yoPmZMlsUCj-z7o4xYxO7Zh/pub?gid=1680385539&single=true&output=csv";
+// 2) Dirección de la Credencial Digital
+const CREDENCIAL_URL = "https://fanwest-westminster.github.io/credencial-westminster/";
+// =======================================================
+
+const app = document.getElementById("app");
+let data = [];
+
+function parseCSV(t){
+  const rows=[];let r=[],f="",q=false;
+  for(let i=0;i<t.length;i++){
+    const ch=t[i];
+    if(q){ if(ch=='"'){ if(t[i+1]=='"'){f+='"';i++;} else q=false; } else f+=ch; }
+    else if(ch=='"') q=true;
+    else if(ch==","){ r.push(f); f=""; }
+    else if(ch=="\n"||ch=="\r"){ if(ch=="\r"&&t[i+1]=="\n")i++; r.push(f); f=""; if(r.length>1||r[0]!=="")rows.push(r); r=[]; }
+    else f+=ch;
+  }
+  if(f!==""||r.length){ r.push(f); rows.push(r); }
+  const h=rows.shift().map(x=>x.trim());
+  return rows.map(a=>Object.fromEntries(h.map((k,i)=>[k,(a[i]||"").trim()])));
+}
+
+function vigente(b){
+  if(b.activo.toUpperCase()!=="SI" && b.activo.toUpperCase()!=="SÍ") return false;
+  if(!b.vigente_hasta) return true;
+  const d=new Date(b.vigente_hasta+"T23:59:59");
+  return isNaN(d) || d>=new Date();
+}
+
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e;}
+
+function logo(slug,nombre){
+  const d=el("div","logo");
+  const img=new Image();
+  img.src="logos/"+slug+".png"; img.alt=nombre;
+  img.onerror=()=>{d.textContent=nombre.charAt(0).toUpperCase();};
+  d.appendChild(img);
+  return d;
+}
+
+function home(){
+  app.innerHTML="";
+  const seen={};
+  data.forEach(b=>{ if(!seen[b.slug]) seen[b.slug]=b; });
+  const list=Object.values(seen);
+  if(!list.length){ app.appendChild(el("p","msg","Pronto vas a encontrar acá los beneficios.")); return; }
+  app.appendChild(el("h2","","Comercios adheridos"));
+  const g=el("div","grid");
+  list.forEach(b=>{
+    const c=el("div","card com");
+    c.appendChild(logo(b.slug,b.comercio));
+    c.appendChild(el("div","cat",b.categoria));
+    c.appendChild(el("div","tit",b.comercio));
+    const n=data.filter(x=>x.slug===b.slug).length;
+    c.appendChild(el("div","vig",n+(n===1?" beneficio":" beneficios")));
+    c.onclick=()=>{location.hash=b.slug;};
+    g.appendChild(c);
+  });
+  app.appendChild(g);
+}
+
+function comercio(slug){
+  const items=data.filter(b=>b.slug===slug);
+  if(!items.length){ location.hash=""; return; }
+  app.innerHTML="";
+  const back=el("button","back","← Todos los comercios");
+  back.onclick=()=>{location.hash="";};
+  app.appendChild(back);
+  app.appendChild(el("h2","",items[0].comercio));
+  const g=el("div","grid");
+  items.forEach(b=>{
+    const c=el("div","card");
+    c.appendChild(el("div","tit",b.titulo));
+    if(b.condiciones) c.appendChild(el("div","cond",b.condiciones));
+    if(b.vigente_hasta) c.appendChild(el("div","vig","Vigente hasta "+b.vigente_hasta));
+    const a=el("a","btn","Obtener cupón");
+    // Pasa por la Credencial para registrar el uso y luego redirige al destino
+    a.href=CREDENCIAL_URL+"?comercio="+encodeURIComponent(b.slug)
+      +"&beneficio="+encodeURIComponent(b.id)
+      +"&destino="+encodeURIComponent(b.link_destino||"");
+    c.appendChild(a);
+    g.appendChild(c);
+  });
+  app.appendChild(g);
+}
+
+function route(){
+  const h=decodeURIComponent(location.hash.replace("#",""));
+  h ? comercio(h) : home();
+  window.scrollTo(0,0);
+}
+
+fetch(CSV_URL)
+  .then(r=>{ if(!r.ok) throw new Error(r.status); return r.text(); })
+  .then(t=>{ data=parseCSV(t).filter(b=>b.slug&&vigente(b)); route(); })
+  .catch(()=>{ app.innerHTML='<p class="msg">No pudimos cargar los beneficios. Probá de nuevo en unos minutos.</p>'; });
+
+window.addEventListener("hashchange",route);
+</script>
+</body>
+</html>
