@@ -115,8 +115,7 @@ function comercio(slug){
     const a=el("a","btn","Obtener cupón");
     // Pasa por la Credencial para registrar el uso y luego redirige al destino
     a.href=CREDENCIAL_URL+"?comercio="+encodeURIComponent(b.slug)
-      +"&beneficio="+encodeURIComponent(b.id)
-      +"&destino="+encodeURIComponent(b.link_destino||"");
+      +"&beneficio="+encodeURIComponent(b.id);
     c.appendChild(a);
     g.appendChild(c);
   });

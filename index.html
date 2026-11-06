@@ -364,6 +364,7 @@
 
       <div class="validity-bar"><div class="validity-bar__fill" id="validityFill"></div></div>
       <p class="validity-label" id="validityLabel">Mostrá esta pantalla al comercio mientras esté activa.</p>
+      <a id="beneficioBtn" href="#" style="display:none;margin-top:14px;padding:12px 16px;border-radius:24px;background:var(--azul);color:#fff;text-align:center;font-weight:700;text-decoration:none;">Ir a la oferta &rarr;</a>
       <p class="expired-note" id="expiredNote">Esta credencial expiró. Volvé a verificar tu identidad.</p>
 
       <button class="logout-link" id="resetBtn">Verificar otra cuenta</button>
@@ -394,13 +395,49 @@ if (COMERCIO === 'No especificado') {
   });
 }
 
+  // =====================================================================
+  // BENEFICIOS: si el link trae ?beneficio=ID, después de verificar se busca
+  // el link de la oferta en la planilla (pestaña BENEFICIOS) y se lleva a la persona.
+  // =====================================================================
+  const CSV_BENEFICIOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj997Q_ICW2oLVr-yTK53QihfZCRicC4qUSJPHA9cFZ6mU7HYUKv7K9yoPmZMlsUCj-z7o4xYxO7Zh/pub?gid=1680385539&single=true&output=csv";
+  const BENEFICIO_ID = params.get('beneficio') || '';
+
+  function parseCsv(t) {
+    const rows = []; let r = [], f = "", q = false;
+    for (let i = 0; i < t.length; i++) {
+      const ch = t[i];
+      if (q) { if (ch === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ',') { r.push(f); f = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && t[i + 1] === "\n") i++; r.push(f); f = ""; if (r.length > 1 || r[0] !== "") rows.push(r); r = []; }
+      else f += ch;
+    }
+    if (f !== "" || r.length) { r.push(f); rows.push(r); }
+    return rows;
+  }
+
+  function irAlBeneficio() {
+    if (!BENEFICIO_ID) return;
+    fetch(CSV_BENEFICIOS).then(function (r) { return r.text(); }).then(function (t) {
+      const filas = parseCsv(t);
+      const h = filas.shift().map(function (x) { return x.trim(); });
+      const iId = h.indexOf('id'), iLink = h.indexOf('link_destino');
+      const fila = filas.find(function (f) { return (f[iId] || '').trim() === BENEFICIO_ID; });
+      const link = fila ? (fila[iLink] || '').trim() : '';
+      if (!/^https:\/\//i.test(link)) return; // solo links https que salen de la planilla
+      const btn = document.getElementById('beneficioBtn');
+      btn.href = link; btn.style.display = 'block';
+      setTimeout(function () { window.location.href = link; }, 2500);
+    }).catch(function (e) { console.warn('No se pudo abrir el beneficio', e); });
+  }
+
   function registrarVerificacion(nombre, email) {
     if (REGISTRO_URL === "PEGAR_URL_APPS_SCRIPT_AQUI") return; // no configurado todavía
     fetch(REGISTRO_URL, {
       method: 'POST',
       mode: 'no-cors', // evita bloqueo CORS; no leemos la respuesta, solo enviamos
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ nombre: nombre, email: email, comercio: COMERCIO })
+      body: JSON.stringify({ nombre: nombre, email: email, comercio: COMERCIO, beneficio: BENEFICIO_ID })
     }).catch(function(err){ console.warn('No se pudo registrar la verificación', err); });
   }
 
@@ -452,6 +489,7 @@ if (COMERCIO === 'No especificado') {
     document.getElementById('expiredNote').classList.remove('show');
 
     registrarVerificacion(payload.name, payload.email);
+    irAlBeneficio();
 
     startValidityCountdown();
     startClock();
