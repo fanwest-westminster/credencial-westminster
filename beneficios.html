@@ -72,8 +72,11 @@ function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=
 function logo(slug,nombre){
   const d=el("div","logo");
   const img=new Image();
-  img.src="imagenes/"+slug+".png"; img.alt=nombre;
-  img.onerror=()=>{d.textContent=nombre.charAt(0).toUpperCase();};
+  img.src=slug+".png"; img.alt=nombre;
+  img.onerror=()=>{
+    img.onerror=()=>{d.textContent=nombre.charAt(0).toUpperCase();};
+    img.src="imagenes/"+slug+".png";
+  };
   d.appendChild(img);
   return d;
 }
@@ -110,13 +113,16 @@ function comercio(slug){
   const g=el("div","grid");
   items.forEach(b=>{
     const c=el("div","card");
-    // Si existe imagenes/<id>.jpg se muestra la imagen en lugar del título escrito
+    // Si existe <id>.jpg (en la raíz del repo) se muestra la imagen en lugar del título escrito
     const tit=el("div","tit",b.titulo);
     const im=new Image();
     im.className="promo"; im.alt=b.titulo; im.style.display="none";
     im.onload=()=>{ im.style.display="block"; tit.style.display="none"; };
-    im.onerror=()=>{ im.remove(); };
-    im.src="imagenes/"+b.id+".jpg";
+    im.onerror=()=>{
+      im.onerror=()=>{ im.remove(); };
+      im.src="imagenes/"+b.id+".jpg";
+    };
+    im.src=b.id+".jpg";
     c.appendChild(im);
     c.appendChild(tit);
     if(b.condiciones) c.appendChild(el("div","cond",b.condiciones));
