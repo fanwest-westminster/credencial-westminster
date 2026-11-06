@@ -365,6 +365,7 @@
       <div class="validity-bar"><div class="validity-bar__fill" id="validityFill"></div></div>
       <p class="validity-label" id="validityLabel">Mostrá esta pantalla al comercio mientras esté activa.</p>
       <a id="beneficioBtn" href="#" style="display:none;margin-top:14px;padding:12px 16px;border-radius:24px;background:var(--azul);color:#fff;text-align:center;font-weight:700;text-decoration:none;">Ir a la oferta &rarr;</a>
+      <a id="verBeneficiosBtn" href="beneficios.html#McDonalds-Banfield" style="display:none;margin-top:14px;padding:12px 16px;border-radius:24px;background:var(--rojo-operativo);color:#fff;text-align:center;font-weight:700;text-decoration:none;">Beneficios McDonald&#39;s &rarr;</a>
       <p class="expired-note" id="expiredNote">Esta credencial expiró. Volvé a verificar tu identidad.</p>
 
       <button class="logout-link" id="resetBtn">Verificar otra cuenta</button>
@@ -487,6 +488,10 @@ if (COMERCIO === 'No especificado') {
     document.getElementById('view-login').style.display = 'none';
     document.getElementById('view-verified').classList.add('show');
     document.getElementById('expiredNote').classList.remove('show');
+
+    if (COMERCIO === 'McDonalds-Banfield') {
+      document.getElementById('verBeneficiosBtn').style.display = 'block';
+    }
 
     registrarVerificacion(payload.name, payload.email);
     irAlBeneficio();
